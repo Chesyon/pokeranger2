@@ -120,3 +120,8 @@ compile_commands.json
 # Cheat files
 *.dct
 *.mch
+
+# Asset extraction
+baserom.nds
+res/prebuilt/
+!res/prebuilt/**/meson.build

@@ -17,7 +17,8 @@ Shadows of Almia (EN-US) using this repository.
     - [Arch Linux (and derivatives, e.g., Manjaro, Endeavour)](#arch-linux-and-derivatives-eg-manjaro-endeavour)
     - [Fedora (and derivatives, e.g., AlmaLinux, Red Hat Enterprise Linux)](#fedora-and-derivatives-eg-almalinux-red-hat-enterprise-linux)
 - [2. Downloading the Repository](#2-downloading-the-repository)
-- [3. Building the Repository](#3-building-the-repository)
+- [3. Setup Asset Extraction](#3-setup-asset-extraction)
+- [4. Building the Repository](#4-building-the-repository)
 - [Troubleshooting FAQ](#troubleshooting-faq)
   - [My Build is Failing After Merging from Main](#my-build-is-failing-after-merging-from-main)
 
@@ -258,12 +259,49 @@ git clone https://github.com/Kuruyia/pokeranger2.git
 cd pokeranger2
 ```
 
-## 3. Building the Repository
+## 3. Setup Asset Extraction
+
+This project uses [ndspy](https://github.com/RoadrunnerWMC/ndspy) to extract
+assets from the original ROM. Install it via pip:
+
+```bash
+pip install ndspy
+```
+
+> If you are using a system where `pip install` is restricted (e.g., newer
+> Ubuntu versions), try:
+>
+> ```bash
+> pip install --user ndspy
+> ```
+>
+> Or use a virtual environment.
+
+You must provide the original Pokémon Ranger: Shadows of Almia (US) ROM to
+extract them. Place the ROM at the project root with the name `baserom.nds`.
+
+## 4. Building the Repository
 
 To build the ROM, run:
 
 ```bash
 make
+```
+
+This will automatically extract the assets from `baserom.nds` (if not already
+extracted) and then build the ROM.
+
+If your ROM is named differently or located elsewhere, set the `BASEROM`
+variable:
+
+```bash
+make BASEROM=/path/to/your/rom.nds
+```
+
+To manually extract assets without building:
+
+```bash
+make extract BASEROM=/path/to/your/rom.nds
 ```
 
 If everything works, then the following ROM should be built:

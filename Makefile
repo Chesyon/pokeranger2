@@ -6,6 +6,7 @@
 	configure     \
 	distclean     \
 	debug         \
+	extract       \
 	format        \
 	meson         \
 	purge         \
@@ -28,6 +29,10 @@ MESON_SUB := $(MESON_DIR)/meson.py
 MESON ?= $(MESON_SUB)
 NINJA ?= ninja
 GIT ?= git
+
+BASEROM ?= baserom.nds
+EXTRACT_SCRIPT := tools/extract_assets/extract_assets.py
+EXTRACT_SENTINEL := res/prebuilt/.extracted
 
 BUILD ?= build
 ROOT_INI := $(BUILD)/root.ini
@@ -136,7 +141,7 @@ setup_debug: $(BUILD)/build.ninja
 
 configure: $(BUILD)/build.ninja
 
-$(BUILD)/build.ninja: $(ROOT_INI) | $(BUILD) $(SKREW_EXE) meson
+$(BUILD)/build.ninja: $(ROOT_INI) $(EXTRACT_SENTINEL) | $(BUILD) $(SKREW_EXE) meson
 	$(MESON) setup \
 		--wrap-mode=nopromote \
 		--native-file=meson/$(NATIVE) \
@@ -144,6 +149,30 @@ $(BUILD)/build.ninja: $(ROOT_INI) | $(BUILD) $(SKREW_EXE) meson
 		--cross-file=meson/$(CROSS) \
 		--cross-file=$(ROOT_INI) \
 		-- $(BUILD)
+
+$(EXTRACT_SENTINEL):
+	@if [ -f "res/prebuilt/data/Script/area/m000.fsb" ]; then \
+		echo "Found existing assets, skipping extraction."; \
+		touch $@; \
+	elif [ -f "$(BASEROM)" ]; then \
+		echo "Extracting assets from $(BASEROM)..."; \
+		python3 $(EXTRACT_SCRIPT) "$(BASEROM)"; \
+		touch $@; \
+	else \
+		echo "ERROR: No extracted assets found and no original ROM provided."; \
+		echo ""; \
+		echo "To build this project, you need the original Pokémon Ranger:"; \
+		echo "Shadows of Almia (US) ROM."; \
+		echo ""; \
+		echo "Place your ROM at '$(BASEROM)' in the project root, or set"; \
+		echo "the BASEROM variable to point to your ROM:"; \
+		echo "  make BASEROM=/path/to/Pokemon_Ranger_2.us.nds"; \
+		echo ""; \
+		echo "Expected SHA1: ca9c27752547e4d31fe5560265d9b7e09f9f83eb"; \
+		exit 1; \
+	fi
+
+extract: $(EXTRACT_SENTINEL)
 
 $(ROOT_INI): | $(BUILD)
 	echo "[constants]" > $@

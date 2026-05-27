@@ -26,13 +26,28 @@ jobs:
         run: |
           sudo apt-get update -y
           sudo apt-get install -y --no-install-recommends bison flex g++ gcc-arm-none-eabi git make ninja-build pkg-config python3 wget xz-utils
-          pip install --user pyelftools
+          pip install --user pyelftools ndspy
 
       - name: Checkout Repo
         uses: actions/checkout@v6
 
       - name: Install Metroskrew
         run: sudo make skrew
+
+      - name: Restore Original ROM
+        id: rom-cache
+        uses: actions/cache@v4
+        with:
+          path: baserom.nds
+          key: baserom-${{ hashFiles('ranger2.us/rom.sha1') }}
+
+      - name: Extract Assets
+        run: |
+          if [ -f baserom.nds ]; then
+            make extract
+          else
+            echo "No baserom.nds found. Build will fail if assets are not already extracted."
+          fi
 
       - name: Configure Repo
         run: make configure
